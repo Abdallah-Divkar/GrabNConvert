@@ -1,1 +1,1 @@
-Flaskgunicornmoviepyffmpeg-pythonyt-dlppillow
+Flaskgunicornmoviepy==1.0.3ffmpeg-pythonyt-dlppillow
