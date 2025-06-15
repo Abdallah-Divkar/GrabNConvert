@@ -42,20 +42,24 @@
     <!-- YouTube Downloader -->
     <div class="form-section">
       <h4>YouTube Downloader</h4>
-      <form method="POST" onsubmit="showSpinner()">
+      <form method="POST" enctype="multipart/form-data" onsubmit="showSpinner()">
         <input type="hidden" name="form_type" value="yt_download">
+
         <div class="mb-3">
           <input type="text" class="form-control" name="url" placeholder="🔗 YouTube Video URL" required>
         </div>
+
         <div class="mb-3">
-          <select name="yt_option" class="form-select">
+          <select name="yt_option" class="form-select" required>
             <option value="video">📹 Download Video (MP4)</option>
             <option value="audio">🎵 Download Audio (MP3)</option>
           </select>
         </div>
+
         <div class="mb-3">
-          <input type="text" class="form-control" name="output_folder" placeholder="📁 Optional Output Folder (inside server)">
+          <input type="text" class="form-control" id="yt_folder" name="output_folder" placeholder="📁 Folder name for saving (on server)" required>
         </div>
+
         <button type="submit" class="btn btn-primary w-100">Download</button>
       </form>
     </div>
@@ -67,14 +71,18 @@
       <h4>Local File Converter</h4>
       <form method="POST" enctype="multipart/form-data" onsubmit="showSpinner()">
         <input type="hidden" name="form_type" value="convert_file">
+
         <div class="mb-3">
-          <input type="file" class="form-control" name="file" required>
+          <input type="file" class="form-control" name="file" accept="video/*,audio/*,image/*" required>
         </div>
+
         <div class="mb-3">
           <input type="text" class="form-control" name="filename" placeholder="📝 Optional custom output name">
         </div>
+
         <div class="mb-3">
-          <select name="convert_option" class="form-select">
+          <select name="convert_option" class="form-select" required>
+            <option value="">-- Select Conversion Type --</option>
             <option value="v2a">🎬 Video to MP3</option>
             <option value="a2wav">🎵 MP3 to WAV</option>
             <option value="img2png">🖼️ Image to PNG</option>
@@ -82,17 +90,19 @@
             <option value="img2jpeg">🖼️ Image to JPEG</option>
             <option value="img2ico">🖼️ Image to ICO</option>
           </select>
+        </div>
 
-        </div>
         <div class="mb-3">
-          <input type="text" class="form-control" name="output_folder" placeholder="📁 Optional Output Folder (inside server)">
+          <input type="text" class="form-control" name="output_folder" placeholder="📁 Output Folder (on server)" required>
         </div>
+
         <button type="submit" class="btn btn-success w-100">Convert</button>
       </form>
-    </div>
 
-    <div class="text-center mt-3">
-      <a href="{{ url_for('list_downloads') }}" class="btn btn-outline-secondary btn-sm">📁 View Downloaded Files</a>
+      <!-- Dynamic Folder Viewer Button -->
+      <div class="text-center mt-3">
+        <button class="btn btn-outline-secondary btn-sm" onclick="goToDownloads()">📁 View Downloaded Files</button>
+      </div>
     </div>
   </div>
 
@@ -100,11 +110,23 @@
     <p>&copy; 2025 GrabNConvert | Built with Flask + ❤️</p>
   </footer>
 
+  <!-- Spinner Logic -->
   <script>
     function showSpinner() {
       document.getElementById('spinner').style.display = 'inline-block';
     }
+
+    function goToDownloads() {
+      const folderInput = document.getElementById('yt_folder');
+      if (folderInput && folderInput.value.trim()) {
+        const folderName = folderInput.value.trim();
+        window.location.href = `/downloads/${encodeURIComponent(folderName)}`;
+      } else {
+        alert("Please enter the output folder name first.");
+      }
+    }
   </script>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
