@@ -1,0 +1,10 @@
+<!-- templates/error.html - Error page -->
+{% extends "base.html" %}
+
+{% block content %}
+<div style="text-align: center; padding: 40px 20px;">
+    <h2>{{ error_code }}</h2>
+    <p>{{ error_message }}</p>
+    <a href="/" class="btn">← Back to Home</a>
+</div>
+{% endblock %}
