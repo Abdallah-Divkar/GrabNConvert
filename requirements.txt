@@ -1,1 +1,7 @@
-Flaskgunicornmoviepy==1.0.3ffmpeg-pythonyt-dlppillow
+Flask==3.0.0
+gunicorn==21.2.0
+python-dotenv==1.0.0
+moviepy==1.0.3
+ffmpeg-python==0.2.0
+yt-dlp==2023.7.6
+Pillow==10.0.0

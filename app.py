@@ -1,16 +1,22 @@
 import io
 import os
 import zipfile
+from dotenv import load_dotenv
 
 from flask import Flask, request, render_template, flash, redirect, send_file
 from downloader import download_video, download_audio
 from converter import video_to_audio, audio_to_wav, convert_image_format
 
-app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+load_dotenv()
 
-BASE_OUTPUT_DIR = 'output'
+app = Flask(__name__)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY')
+
+BASE_OUTPUT_DIR = os.environ.get('BASE_OUTPUT_DIR', 'output')
 os.makedirs(BASE_OUTPUT_DIR, exist_ok=True)
+
+for directory in ['uploads', 'output']:
+    os.makedirs(directory, exist_ok=True)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
