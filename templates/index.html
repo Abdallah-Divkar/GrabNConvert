@@ -104,6 +104,14 @@
         <button class="btn btn-outline-secondary btn-sm" onclick="goToDownloads()">📁 View Downloaded Files</button>
       </div>
     </div>
+
+    <!-- Download Status Alert -->
+    <div class="alert alert-info mt-3" id="downloadStatus" style="display: none;">
+      <div class="spinner-border spinner-border-sm" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <span>Processing your download...</span>
+    </div>
   </div>
 
   <footer>
@@ -125,6 +133,10 @@
         alert("Please enter the output folder name first.");
       }
     }
+
+    document.getElementById('downloadForm').addEventListener('submit', function(e) {
+      document.getElementById('downloadStatus').style.display = 'block';
+    });
   </script>
 
 

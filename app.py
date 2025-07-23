@@ -22,11 +22,12 @@ for directory in ['uploads', 'output']:
 def index():
     if request.method == "POST":
         form_type = request.form.get("form_type")
-        output_folder = request.form.get("output_folder", "").strip()
+        output_folder = request.form.get("output_folder", "default").strip()  # Set default folder if none provided
 
-        if not output_folder:
-            flash("❌ Please enter an output folder name before proceeding.", "danger")
-            return redirect("/")
+        # Create a timestamped folder name if none provided
+        if not output_folder or output_folder == "default":
+            from datetime import datetime
+            output_folder = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         final_output = os.path.join(BASE_OUTPUT_DIR, output_folder)
         os.makedirs(final_output, exist_ok=True)
@@ -36,10 +37,11 @@ def index():
                 url = request.form.get("url")
                 option = request.form.get("yt_option")
                 if option == "video":
-                    download_video(url, final_output)
+                    filename = download_video(url, final_output)
                 elif option == "audio":
-                    download_audio(url, final_output)
-                flash("✅ Download complete!", "success")
+                    filename = download_audio(url, final_output)
+                flash(f"✅ Download complete! Your file is ready: {filename}", "success")
+                return redirect(f"/downloads/{output_folder}")  # Redirect to downloads page
 
             elif form_type == "convert_file":
                 file = request.files.get("file")
@@ -94,7 +96,15 @@ def download_file():
         flash("❌ File not found.", "danger")
         return redirect(f"/downloads/{folder}")
 
-    return send_file(filepath, as_attachment=True)
+    try:
+        return send_file(
+            filepath,
+            as_attachment=True,
+            download_name=filename  # Ensure proper filename
+        )
+    except Exception as e:
+        flash(f"❌ Download failed: {str(e)}", "danger")
+        return redirect(f"/downloads/{folder}")
 
 @app.route('/download_zip', methods=['POST'])
 def download_zip():
