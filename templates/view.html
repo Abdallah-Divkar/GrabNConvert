@@ -1,0 +1,7 @@
+{% extends 'layout.html' %}
+{% block title %}View Generated Quote{% endblock %}
+{% block content %}
+<h2>Quotation Generated</h2>
+<p>Output Folder: {{ folder_name }}</p>
+<a href="/download_zip/{{ folder_name }}">Download All as ZIP</a>
+{% endblock %}

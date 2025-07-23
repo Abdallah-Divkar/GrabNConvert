@@ -1,0 +1,82 @@
+<!-- templates/downloading.html - Download progress page -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="loading">
+    <div class="spinner"></div>
+    <h3>Downloading: {{ metadata.title or "Your Video" }}</h3>
+    <p>Please wait while we process your download...</p>
+    
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div id="status">Initializing download...</div>
+</div>
+
+<form style="display: none;" id="downloadForm" action="/api/download" method="POST">
+    <input type="hidden" name="url" value="{{ url }}">
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let progress = 0;
+const progressFill = document.getElementById('progressFill');
+const status = document.getElementById('status');
+
+// Simulate progress
+function updateProgress() {
+    if (progress < 90) {
+        progress += Math.random() * 10;
+        progressFill.style.width = progress + '%';
+        
+        if (progress < 30) {
+            status.textContent = 'Connecting to YouTube...';
+        } else if (progress < 60) {
+            status.textContent = 'Extracting audio stream...';
+        } else {
+            status.textContent = 'Converting to MP3...';
+        }
+        
+        setTimeout(updateProgress, 1000);
+    }
+}
+
+// Start download process
+function startDownload() {
+    const formData = new FormData();
+    formData.append('url', '{{ url }}');
+    
+    fetch('/api/download', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({url: '{{ url }}'})
+    })
+    .then(response => response.json())
+    .then(data => {
+        progress = 100;
+        progressFill.style.width = '100%';
+        
+        if (data.success) {
+            status.innerHTML = `✅ Download completed!<br><strong>${data.title}</strong>`;
+            // Auto redirect after 3 seconds
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 3000);
+        } else {
+            status.innerHTML = `❌ Error: ${data.error}`;
+        }
+    })
+    .catch(error => {
+        status.innerHTML = `❌ Download failed: ${error.message}`;
+    });
+}
+
+// Start the process
+updateProgress();
+startDownload();
+</script>
+{% endblock %}

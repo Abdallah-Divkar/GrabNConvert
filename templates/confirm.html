@@ -1,0 +1,52 @@
+<!-- templates/confirm.html - Video confirmation page -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="video-preview">
+    <div style="text-align: center;">
+        <img src="{{ metadata.thumbnail }}" alt="Video thumbnail" class="video-thumbnail">
+    </div>
+    
+    <div class="video-info">
+        <h3>{{ metadata.title }}</h3>
+        <div class="video-meta">
+            <div>📺 Channel: {{ metadata.channel }}</div>
+            <div>⏱️ Duration: {{ metadata.duration }}</div>
+            <div>👀 Views: {{ "{:,}".format(metadata.view_count|int) }}</div>
+            <div>📅 Uploaded: {{ metadata.upload_date }}</div>
+        </div>
+        
+        {% if metadata.description %}
+        <div style="margin-top: 15px;">
+            <strong>Description:</strong>
+            <p style="color: #718096; font-size: 14px; margin-top: 5px;">
+                {{ metadata.description }}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<form method="POST" action="/download" id="confirmForm">
+    <input type="hidden" name="url" value="{{ url }}">
+    
+    <div style="text-align: center; margin-top: 30px;">
+        <button type="submit" class="btn" id="downloadBtn" style="margin-right: 10px;">
+            ⬇️ Download Audio
+        </button>
+        <a href="/" class="btn" style="background: #6c757d; text-decoration: none;">
+            ← Back
+        </a>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('confirmForm').addEventListener('submit', function(e) {
+    const downloadBtn = document.getElementById('downloadBtn');
+    downloadBtn.disabled = true;
+    downloadBtn.innerHTML = '🔄 Starting Download...';
+});
+</script>
+{% endblock %}

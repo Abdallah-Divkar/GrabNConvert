@@ -1,7 +1,10 @@
-Flask==3.0.0
-gunicorn==21.2.0
-python-dotenv==1.0.0
-moviepy==1.0.3
+Flask==3.0.3
+gunicorn==22.0.0
+python-dotenv==1.0.1
+yt-dlp>=2025.1.27
 ffmpeg-python==0.2.0
-yt-dlp==2023.7.6
-Pillow==9.5.0
+Pillow==10.4.0
+requests==2.32.3
+google-api-python-client==2.147.0
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.1
