@@ -1,3 +1,6 @@
+<!--
+--- templates/index.html
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,9 +28,11 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }}" role="alert">
-            {{ message }}
-          </div>
+          {% if category == 'danger' %}
+            <div class="alert alert-danger" role="alert">
+              {{ message }}
+            </div>
+          {% endif %}
         {% endfor %}
       {% endif %}
     {% endwith %}
@@ -115,18 +120,31 @@
     function showSpinner() {
       document.getElementById('spinner').style.display = 'inline-block';
     }
-
-    function goToDownloads() {
-      const folderInput = document.getElementById('yt_folder');
-      if (folderInput && folderInput.value.trim()) {
-        const folderName = folderInput.value.trim();
-        window.location.href = `/downloads/${encodeURIComponent(folderName)}`;
-      } else {
-        alert("Please enter the output folder name first.");
-      }
-    }
   </script>
 
+  <div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body text-center">
+          <h5>✅ Done!</h5>
+          <p>Your file was processed successfully.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% for category, message in get_flashed_messages(with_categories=true) %}
+    {% if category == 'success' %}
+      <script>
+        window.addEventListener("load", () => {
+          const modal = new bootstrap.Modal(
+            document.getElementById("successModal")
+          );
+          modal.show();
+        });
+      </script>
+    {% endif %}
+  {% endfor %}
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

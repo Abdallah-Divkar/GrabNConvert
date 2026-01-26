@@ -1,8 +1,10 @@
 .env
+venv/
 __pycache__/
-*.pyc
 uploads/
 output/
 downloads/
 temp/
-venv/
+.idea/
+*.pyc
+

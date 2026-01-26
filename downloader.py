@@ -1,10 +1,10 @@
+"""
+### downloader.py
+"""
 import yt_dlp
 import os
 
-OUTPUT_DIR = 'output'  # Default output directory
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-def download_video(url, output_path=OUTPUT_DIR):
+def download_video(url, output_path):
     try:
         print("\n🔽 Downloading video...")
         filename = None

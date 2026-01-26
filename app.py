@@ -1,121 +1,119 @@
+"""
+### app.py
+"""
 import io
 import os
 import zipfile
-
-from flask import Flask, request, render_template, flash, redirect, send_file
+from flask import Flask, request, render_template, flash, redirect, url_for, send_file
+from werkzeug.utils import secure_filename
 from downloader import download_video, download_audio
 from converter import video_to_audio, audio_to_wav, convert_image_format
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = os.environ["SECRET_KEY"]
+#app.secret_key = os.getenv("SECRET_KEY", "dev_secret")
 
-BASE_OUTPUT_DIR = 'output'
+BASE_OUTPUT_DIR = os.path.abspath("output")
+UPLOAD_DIR = os.path.abspath("uploads")
+
 os.makedirs(BASE_OUTPUT_DIR, exist_ok=True)
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
         form_type = request.form.get("form_type")
-        output_folder = request.form.get("output_folder", "").strip()
+        folder = request.form.get("output_folder", "").strip()
 
-        if not output_folder:
-            flash("❌ Please enter an output folder name before proceeding.", "danger")
-            return redirect("/")
+        if not folder:
+            flash("Please enter an output folder name before proceeding.", "danger")
+            return redirect(url_for("index"))
 
-        final_output = os.path.join(BASE_OUTPUT_DIR, output_folder)
-        os.makedirs(final_output, exist_ok=True)
+        output_dir = os.path.join(BASE_OUTPUT_DIR, secure_filename(folder))
+        os.makedirs(output_dir, exist_ok=True)
 
         try:
             if form_type == "yt_download":
                 url = request.form.get("url")
                 option = request.form.get("yt_option")
                 if option == "video":
-                    download_video(url, final_output)
+                    download_video(url, output_dir)
                 elif option == "audio":
-                    download_audio(url, final_output)
-                flash("✅ Download complete!", "success")
+                    download_audio(url, output_dir)
+                #flash("✅ Download complete!", "success")
 
             elif form_type == "convert_file":
                 file = request.files.get("file")
-                filename = file.filename
-                save_path = os.path.join("uploads", filename)
-                file.save(save_path)
+                if not file or not file.filename:
+                    raise ValueError("No file uploaded")
+
+                filename = secure_filename(file.filename)
+                saved_path = os.path.join(UPLOAD_DIR, filename)
+                file.save(saved_path)
 
                 option = request.form.get("convert_option")
-                custom_name = request.form.get("filename").strip() or None
+                custom_name = request.form.get("filename") or None
 
                 if option == "v2a":
-                    video_to_audio(save_path, final_output, custom_name)
+                    video_to_audio(saved_path, output_dir, custom_name)
                 elif option == "a2wav":
-                    audio_to_wav(save_path, final_output, custom_name)
+                    audio_to_wav(saved_path, output_dir, custom_name)
                 elif option.startswith("img2"):
-                    img_format = option.split("img2")[1]
-                    convert_image_format(save_path, final_output, img_format, custom_name)
+                    convert_image_format(
+                        saved_path,
+                        output_dir,
+                        option.replace("img2", ""),
+                        custom_name
+                    )
 
-                flash("✅ Conversion complete!", "success")
+            flash("Conversion complete!", "success")
+
         except Exception as e:
-            flash(f"❌ Error: {e}", "danger")
+            flash(str(e), "danger")
+            return redirect(url_for("index"))
 
-        return redirect("/")
+        finally:
+            if form_type == "convert_file" and os.path.exists(saved_path):
+                os.remove(saved_path)
 
     return render_template("index.html")
 
 
 @app.route("/downloads/<folder>")
-def list_downloads(folder):
-    folder_path = os.path.join(BASE_OUTPUT_DIR, folder)
+def downloads(folder):
+    folder_path = os.path.join(BASE_OUTPUT_DIR, secure_filename(folder))
 
     if not os.path.exists(folder_path):
-        flash("❌ Folder not found!", "danger")
-        return redirect("/")
+        flash("Folder not found!", "danger")
+        return redirect(url_for("index"))
 
-    files = os.listdir(folder_path)
+    files = sorted(os.listdir(folder_path))
     return render_template("downloads.html", files=files, folder=folder)
-
 
 @app.route('/download', methods=['POST'])
 def download_file():
     folder = request.form.get("folder")
     filename = request.form.get("filename")
 
-    if not folder or not filename:
-        flash("❌ Missing folder or filename.", "danger")
-        return redirect("/")
+    path = os.path.join(BASE_OUTPUT_DIR, folder, filename)
+    if not os.path.exists(path):
+        flash("File not found.", "danger")
+        return redirect(url_for("downloads", folder=folder))
 
-    filepath = os.path.join(BASE_OUTPUT_DIR, folder, filename)
-
-    if not os.path.exists(filepath):
-        flash("❌ File not found.", "danger")
-        return redirect(f"/downloads/{folder}")
-
-    return send_file(filepath, as_attachment=True)
+    return send_file(path, as_attachment=True)
 
 @app.route('/download_zip', methods=['POST'])
 def download_zip():
-    folder = request.form.get("folder")
-    if not folder:
-        flash("❌ Folder name missing.", "danger")
-        return redirect("/")
-
+    folder = secure_filename(request.form.get("folder"))
     folder_path = os.path.join(BASE_OUTPUT_DIR, folder)
-    if not os.path.exists(folder_path):
-        flash("❌ Folder not found.", "danger")
-        return redirect("/")
 
-    # Create in-memory zip file
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-        for filename in os.listdir(folder_path):
-            file_path = os.path.join(folder_path, filename)
-            zip_file.write(file_path, arcname=filename)
+    mem_zip = io.BytesIO()
+    with zipfile.ZipFile(mem_zip, "w", zipfile.ZIP_DEFLATED) as z:
+        for f in os.listdir(folder_path):
+            z.write(os.path.join(folder_path, f), arcname=f)
 
-    zip_buffer.seek(0)
-    return send_file(
-        zip_buffer,
-        mimetype='application/zip',
-        download_name=f"{folder}.zip",
-        as_attachment=True
-    )
+    mem_zip.seek(0)
+    return send_file(mem_zip, download_name=f"{folder}.zip", as_attachment=True)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
