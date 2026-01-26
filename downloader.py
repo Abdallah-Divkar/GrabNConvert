@@ -31,7 +31,7 @@ def download_video(url, output_path):
         print(f"❌ Error downloading video: {e}")
         raise
 
-def download_audio(url, output_path=OUTPUT_DIR):
+def download_audio(url, output_path):
     try:
         print("\n🎵 Downloading audio...")
         filename = None

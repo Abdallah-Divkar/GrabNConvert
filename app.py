@@ -13,9 +13,8 @@ app = Flask(__name__)
 app.secret_key = os.environ["SECRET_KEY"]
 #app.secret_key = os.getenv("SECRET_KEY", "dev_secret")
 
-BASE_OUTPUT_DIR = os.path.abspath("output")
-UPLOAD_DIR = os.path.abspath("uploads")
-
+BASE_OUTPUT_DIR = os.path.abspath(os.getenv("BASE_OUTPUT_DIR", "output"))
+UPLOAD_DIR = os.path.abspath(os.getenv("UPLOAD_FOLDER", "uploads"))
 os.makedirs(BASE_OUTPUT_DIR, exist_ok=True)
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
