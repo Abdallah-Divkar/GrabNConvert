@@ -10,8 +10,8 @@ from downloader import download_video, download_audio
 from converter import video_to_audio, audio_to_wav, convert_image_format
 
 app = Flask(__name__)
-app.secret_key = os.environ["SECRET_KEY"]
-#app.secret_key = os.getenv("SECRET_KEY", "dev_secret")
+#app.secret_key = os.environ["SECRET_KEY"]
+app.secret_key = os.getenv("SECRET_KEY", "dev_secret")
 
 BASE_OUTPUT_DIR = os.path.abspath(os.getenv("BASE_OUTPUT_DIR", "output"))
 UPLOAD_DIR = os.path.abspath(os.getenv("UPLOAD_FOLDER", "uploads"))
@@ -66,6 +66,7 @@ def index():
                     )
 
             flash("Conversion complete!", "success")
+            return redirect(url_for("downloads", folder=folder))
 
         except Exception as e:
             flash(str(e), "danger")

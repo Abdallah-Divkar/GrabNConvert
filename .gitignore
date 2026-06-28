@@ -7,4 +7,5 @@ downloads/
 temp/
 .idea/
 *.pyc
+cookies.txt
 

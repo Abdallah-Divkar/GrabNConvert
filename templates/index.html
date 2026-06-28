@@ -106,7 +106,8 @@
 
       <!-- Dynamic Folder Viewer Button -->
       <div class="text-center mt-3">
-        <button class="btn btn-outline-secondary btn-sm" onclick="goToDownloads()">📁 View Downloaded Files</button>
+        <!--<button class="btn btn-outline-secondary btn-sm" onclick="goToDownloads()">📁 View Downloaded Files</button>-->
+        <a href="{{ url_for('downloads', folder='Reel') }}" class="btn btn-outline-secondary btn-sm">📁 View Downloaded Files</a>
       </div>
     </div>
   </div>

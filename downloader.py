@@ -4,7 +4,47 @@
 import yt_dlp
 import os
 
+COOKIES_FILE = os.path.abspath(os.getenv("COOKIES_FILE", "cookies.txt"))
+
+# Make node.exe visible to yt-dlp if not already on PATH
+if not os.environ.get("NODE"):
+    node_path = r"C:\Program Files\nodejs\node.exe"
+    if os.path.exists(node_path):
+        os.environ["NODE"] = node_path
+
+def _base_opts(output_path):
+    opts = {
+        'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
+    }
+    if os.path.exists(COOKIES_FILE):
+        opts['cookiefile'] = COOKIES_FILE
+    return opts
+
+def download_audio(url, output_path):
+    ydl_opts = {
+        **_base_opts(output_path),
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        'extractor_args': {'youtube': {'player_client': ['android_vr']}},
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+
 def download_video(url, output_path):
+    ydl_opts = {
+        **_base_opts(output_path),
+        'format': 'bestvideo+bestaudio/best',
+        'merge_output_format': 'mp4',
+        'extractor_args': {'youtube': {'player_client': ['android_vr']}},
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+
+'''def download_video(url, output_path):
     try:
         print("\n🔽 Downloading video...")
         filename = None
@@ -61,4 +101,4 @@ def download_audio(url, output_path):
 
     except Exception as e:
         print(f"❌ Error downloading audio: {e}")
-        raise
+        raise'''
