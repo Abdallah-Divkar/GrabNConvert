@@ -73,8 +73,12 @@ def index():
             return redirect(url_for("index"))
 
         finally:
-            if form_type == "convert_file" and os.path.exists(saved_path):
-                os.remove(saved_path)
+            if form_type == "convert_file":
+                try:
+                    if os.path.exists(saved_path):
+                        os.remove(saved_path)
+                except UnboundLocalError:
+                    pass
 
     return render_template("index.html")
 
