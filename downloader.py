@@ -13,11 +13,12 @@ if not os.environ.get("NODE"):
         os.environ["NODE"] = node_path
 
 def _base_opts(output_path):
-    opts = {
-        'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
-    }
+    opts = {'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s')}
     if os.path.exists(COOKIES_FILE):
+        print(f"[cookies] Using: {COOKIES_FILE}")
         opts['cookiefile'] = COOKIES_FILE
+    else:
+        print(f"[cookies] NOT FOUND: {COOKIES_FILE}")
     return opts
 
 def download_audio(url, output_path):
